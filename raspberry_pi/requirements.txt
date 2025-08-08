@@ -1,0 +1,17 @@
+# Raspberry Pi Camera Streaming Server Requirements
+
+# OpenCV for camera access
+opencv-python==4.8.1.78
+
+# GStreamer Python bindings
+PyGObject==3.46.0
+
+# System monitoring
+psutil==5.9.6
+
+# Logging and utilities
+python-json-logger==2.0.7
+
+# For development/testing (optional)
+pytest==7.4.3
+pytest-cov==4.1.0

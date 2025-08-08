@@ -1,0 +1,28 @@
+{
+  "raspberry_pi": {
+    "ip": "192.168.1.100",
+    "ports": {
+      "cam1": 8554,
+      "cam2": 8555,
+      "cam3": 8556
+    }
+  },
+  "display": {
+    "window_size": "1280x480",
+    "fps": 30,
+    "buffer_size": 5
+  },
+  "saved_ips": [],
+  "capture": {
+    "save_directory": "./captures",
+    "image_format": "jpg",
+    "quality": 95,
+    "timestamp_format": "%Y-%m-%d_%H-%M-%S"
+  },
+  "overlay": {
+    "enabled": true,
+    "position": "bottom-left",
+    "font_size": 12,
+    "background_opacity": 0.7
+  }
+}

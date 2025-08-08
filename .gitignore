@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv
+*.egg-info/
+dist/
+build/
+
+# Logs
+*.log
+streaming_server.log
+base_station.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project specific
+base_station/captures/*.jpg
+base_station/captures/*.jpeg
+base_station/captures/*.png
+base_station/captures/*.bmp
+!base_station/captures/.gitkeep

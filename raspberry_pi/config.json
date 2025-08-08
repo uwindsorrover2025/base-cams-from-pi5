@@ -1,0 +1,15 @@
+{
+  "cameras": {
+    "resolution": "640x480",
+    "fps": 15,
+    "codec": "h264"
+  },
+  "rtsp": {
+    "base_port": 8554,
+    "mount_points": ["/cam1", "/cam2", "/cam3"]
+  },
+  "server": {
+    "host": "0.0.0.0",
+    "debug": false
+  }
+}
