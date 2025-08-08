@@ -3,6 +3,9 @@
 # OpenCV for RTSP streaming and image processing
 opencv-python==4.8.1.78
 
+# OpenCV contrib for ArUco markers
+opencv-contrib-python==4.8.1.78
+
 # Pillow for image handling in Tkinter
 Pillow==10.1.0
 

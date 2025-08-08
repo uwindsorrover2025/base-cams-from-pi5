@@ -10,6 +10,7 @@ A Python Tkinter application for viewing RTSP camera streams from Raspberry Pi w
 - **Photo Gallery**: Browse, sort, and manage captured photos
 - **Timestamp Overlay**: Add date/time and camera name to streams
 - **IP Configuration**: Easy setup of Raspberry Pi connection
+- **ArUco Marker Detection**: Real-time detection of ArUco markers (4x4_100 dictionary)
 
 ## Prerequisites
 
@@ -83,9 +84,26 @@ Photos are saved with timestamp filenames:
 |-----|--------|
 | Space | Open capture dialog |
 | G | Open photo gallery |
+| A | Toggle ArUco detection |
 | 1/2/3 | Switch camera in first viewer |
 | F11 | Toggle fullscreen |
 | Escape | Close dialogs |
+
+### ArUco Marker Detection
+
+1. **Enable Detection:**
+   - Click View → ArUco Detection → Enable Detection
+   - Or press 'A' to toggle
+
+2. **View Results:**
+   - ArUco status panel appears on the right
+   - Click View → ArUco Detection → Show Detection Display
+   - Separate window shows detailed results for judges
+
+3. **Supported Markers:**
+   - Dictionary: 4x4_100 (IDs 0-99)
+   - Minimum size: 2" x 2" (5cm x 5cm)
+   - Real-time detection with distance estimation
 
 ## Troubleshooting
 
@@ -153,6 +171,8 @@ base_station/
 ├── ip_config_dialog.py      # IP configuration dialog
 ├── photo_capture_dialog.py  # Photo capture dialog
 ├── photo_gallery.py         # Gallery viewer
+├── aruco_detector.py        # ArUco marker detection
+├── aruco_display_window.py  # ArUco results display
 ├── config.json             # Configuration file
 └── captures/               # Captured photos directory
 ```

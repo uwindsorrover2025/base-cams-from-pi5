@@ -34,10 +34,13 @@ class CameraViewer(ttk.Frame):
         self.update_thread = None
         self.stream_manager = None
         self.overlay_manager = None
+        self.aruco_detector = None
         self.camera_name = f"Camera {camera_id + 1}"
+        self.enable_aruco = False
         
         # Callbacks
         self.on_double_click = None
+        self.on_aruco_detection = None
         
         # Create UI elements
         self._create_widgets()
@@ -96,6 +99,14 @@ class CameraViewer(ttk.Frame):
         """Set the overlay manager instance"""
         self.overlay_manager = overlay_manager
         
+    def set_aruco_detector(self, aruco_detector):
+        """Set the ArUco detector instance"""
+        self.aruco_detector = aruco_detector
+        
+    def set_aruco_enabled(self, enabled: bool):
+        """Enable or disable ArUco detection"""
+        self.enable_aruco = enabled
+        
     def set_camera_name(self, name: str):
         """Set camera display name"""
         self.camera_name = name
@@ -127,6 +138,17 @@ class CameraViewer(ttk.Frame):
                     frame = self.stream_manager.get_frame(self.camera_id)
                     
                     if frame is not None:
+                        # Detect ArUco markers if enabled
+                        if self.enable_aruco and self.aruco_detector:
+                            detections = self.aruco_detector.detect_markers(frame, self.camera_id)
+                            
+                            # Draw detections on frame
+                            frame = self.aruco_detector.draw_detections(frame, detections)
+                            
+                            # Notify callback if detections found
+                            if detections and self.on_aruco_detection:
+                                self.on_aruco_detection(self.camera_id, detections)
+                        
                         # Apply overlay if available
                         if self.overlay_manager:
                             frame = self.overlay_manager.add_overlay(frame, self.camera_name)
@@ -194,6 +216,10 @@ class CameraViewer(ttk.Frame):
     def set_double_click_callback(self, callback: Callable):
         """Set callback for double-click events"""
         self.on_double_click = callback
+        
+    def set_aruco_callback(self, callback: Callable):
+        """Set callback for ArUco detections"""
+        self.on_aruco_detection = callback
         
     def update_size(self, width: int, height: int):
         """Update viewer size"""

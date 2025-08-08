@@ -21,6 +21,8 @@ from timestamp_overlay import TimestampOverlay
 from ip_config_dialog import IPConfigDialog
 from photo_capture_dialog import PhotoCaptureDialog
 from photo_gallery import PhotoGallery
+from aruco_detector import ArUcoDetector
+from aruco_display_window import ArUcoDisplayWindow, ArUcoStatusPanel
 
 class BaseStationGUI:
     def __init__(self):
@@ -39,6 +41,11 @@ class BaseStationGUI:
             font_size=self.config['overlay']['font_size'],
             background_opacity=self.config['overlay']['background_opacity']
         )
+        
+        # ArUco detector
+        self.aruco_detector = ArUcoDetector()
+        self.aruco_enabled = False
+        self.aruco_display = None
         
         # Camera viewers
         self.camera_viewers = []
@@ -142,6 +149,20 @@ class BaseStationGUI:
         menubar.add_cascade(label="View", menu=view_menu)
         view_menu.add_command(label="Photo Gallery", command=self._show_gallery)
         view_menu.add_separator()
+        
+        # ArUco submenu
+        aruco_menu = tk.Menu(view_menu, tearoff=0)
+        view_menu.add_cascade(label="ArUco Detection", menu=aruco_menu)
+        
+        self.aruco_enabled_var = tk.BooleanVar(value=False)
+        aruco_menu.add_checkbutton(
+            label="Enable Detection",
+            variable=self.aruco_enabled_var,
+            command=self._toggle_aruco
+        )
+        aruco_menu.add_command(label="Show Detection Display", command=self._show_aruco_display)
+        
+        view_menu.add_separator()
         view_menu.add_command(label="Fullscreen", command=self._toggle_fullscreen, accelerator="F11")
         
         # Help menu
@@ -218,11 +239,18 @@ class BaseStationGUI:
             )
             viewer.set_stream_manager(self.stream_manager)
             viewer.set_overlay_manager(self.overlay_manager)
+            viewer.set_aruco_detector(self.aruco_detector)
             viewer.set_camera_name(f"Camera {i + 1}")
             viewer.set_double_click_callback(self._on_viewer_double_click)
+            viewer.set_aruco_callback(self._on_aruco_detection)
             viewer.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=2)
             
             self.camera_viewers.append(viewer)
+        
+        # ArUco status panel
+        self.aruco_status_panel = ArUcoStatusPanel(content_frame)
+        self.aruco_status_panel.pack(side=tk.RIGHT, fill=tk.Y, padx=5)
+        self.aruco_status_panel.pack_forget()  # Hidden by default
             
         # Status bar
         self.status_bar = ttk.Frame(self.root, relief=tk.SUNKEN, borderwidth=1)
@@ -247,6 +275,7 @@ class BaseStationGUI:
         self.root.bind("<F11>", lambda e: self._toggle_fullscreen())
         self.root.bind("<space>", lambda e: self._show_capture_dialog())
         self.root.bind("g", lambda e: self._show_gallery())
+        self.root.bind("a", lambda e: self.aruco_enabled_var.set(not self.aruco_enabled_var.get()) or self._toggle_aruco())
         self.root.bind("1", lambda e: self._switch_camera(0, 0))
         self.root.bind("2", lambda e: self._switch_camera(0, 1))
         self.root.bind("3", lambda e: self._switch_camera(0, 2))
@@ -375,6 +404,42 @@ class BaseStationGUI:
             combo.set(f"Camera {camera_index + 1}")
             self._on_camera_change(viewer_index)
             
+    def _toggle_aruco(self):
+        """Toggle ArUco detection"""
+        enabled = self.aruco_enabled_var.get()
+        self.aruco_enabled = enabled
+        
+        # Update all viewers
+        for viewer in self.camera_viewers:
+            viewer.set_aruco_enabled(enabled)
+            
+        # Show/hide status panel
+        if enabled:
+            self.aruco_status_panel.pack(side=tk.RIGHT, fill=tk.Y, padx=5)
+            # Create display window if not exists
+            if self.aruco_display is None:
+                self.aruco_display = ArUcoDisplayWindow(self.root)
+        else:
+            self.aruco_status_panel.pack_forget()
+            
+    def _show_aruco_display(self):
+        """Show ArUco detection display window"""
+        if self.aruco_display is None:
+            self.aruco_display = ArUcoDisplayWindow(self.root)
+        self.aruco_display.show()
+        
+    def _on_aruco_detection(self, camera_id: int, detections):
+        """Handle ArUco detection callback"""
+        # Convert detections list to dictionary
+        detection_dict = {d.marker_id: d for d in detections}
+        
+        # Update status panel
+        self.aruco_status_panel.update_status(camera_id, detection_dict)
+        
+        # Update display window if exists
+        if self.aruco_display:
+            self.aruco_display.update_detections(camera_id, detection_dict)
+    
     def _toggle_overlay(self):
         """Toggle timestamp overlay"""
         enabled = self.overlay_enabled_var.get()
@@ -452,6 +517,7 @@ Keyboard Shortcuts:
 Space       - Capture Photo
 G           - Open Gallery
 1/2/3       - Switch Camera in Viewer 1
+A           - Toggle ArUco Detection
 F11         - Toggle Fullscreen
 Ctrl+Q      - Quit
 
